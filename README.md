@@ -7,11 +7,11 @@ Client send a Request has **_verb_** (which is you want to do), **_headers_** (w
 Then the server send a Response, There's a **_status code_** for whether it succedded or not, **_headers_** that might include information and it may also include **_content._**
 
 More importants verbs
-- GET: Retrieve a resource
-- POST: Add a new resource
-- PUT: Update an existing resource
+- GET: Retrieve a resource (READ)
+- POST: Add a new resource (CREATE)
+- PUT: Update an existing resource (UPDATE)
 - PATCH: Update an existing resource with set of changes
-- DELETE: Remove the existing resource
+- DELETE: Remove the existing resource (DELETE)
 
 REST Concept (REpresentation State Transfer):
 - Separation of Client and Server
@@ -147,6 +147,79 @@ public ActionResult<Client> Get(int id)
         return _mapper<ClientModel>(result);
     }
 ```
+
+POST Verb
+For receive data in the method we need to do one of this two thing:
+ - Add [FromBody] in the parameter's merhod
+ 
+ ```C#
+ public aync Task<ActionResult<Client>> Post([FromBody] ClientModel model)
+ ```
+ 
+ - Add [ApiController] attribute before the class declaration, This attribute tells the system a lot about waht we want as far as expectations.
+   - The first is it's going to attempt to do body binding because it knows it's an API.
+   
+```C#
+[Route("api/[controller]"])
+[ApiController]
+public class ClientController : ControllerBase
+```
+
+In the Post method we have to do the reverse with the modeling code
+
+```C#
+var client = _mapper.Map<Client>(model);
+```
+
+In the Post method is better return a Created($"/api/clients/{client.Code}", _mapper.Map<ClientModel>(client)); this indicate the 201 status code.
+But we don't want to hardCode, we can use LinkGenerator, this is in the Microsoft.AspNetCore routing namespace for versions after 2.2.
+We have to add in the constructor
+ 
+```C#
+public ClientsController(IClientRepository repository, IMapper mapper, LinkGenerator linkGenerator)
+```
+
+And then in the post method
+
+```C#
+var location = _linGenerator.GetPathByAction("Get", "Clients", new { code = model.Code });
+```
+
+Adding Model Validation
+ - In the model we can add attributes to the properties for the validation
+ [Required]
+ [Range(1, 100)]
+ [StringLength(100)]
+ 
+If we want the client will be unique we can do this in the Post method
+
+```C#
+var client = await _repository.GetClientAsync(model.Code);
+if (client != null)
+{ return BadRequest("This client exist") }
+```
+
+For the Put Verb we send in the querystring te code and in the body the changes to do
+And the method will be so that
+
+```C#
+[HttpPut("{code}")]
+public async Task<ActionResult<ClientModel>> Put (string code, ClientModel model)
+{
+  var oldClient = await _repository.GetClientAsync(code);
+  if (oldClient == null) return NotFound($"Could not find client wiht code of {code}");
+  
+  _mapper.Map(model, oldClient);
+  
+  if (await _repository.SaveChangesAsync()) { return _mapper.Map<ClientModel>(oldClient); }
+}
+```
+
+
+
+
+
+
 
 
 
