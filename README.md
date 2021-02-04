@@ -199,7 +199,7 @@ if (client != null)
 { return BadRequest("This client exist") }
 ```
 
-For the Put Verb we send in the querystring te code and in the body the changes to do
+For the Put Verb we send in the querystring the code and in the body the changes to do
 And the method will be so that
 
 ```C#
