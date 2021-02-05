@@ -189,7 +189,7 @@ Adding Model Validation
  - In the model we can add attributes to the properties for the validation
  [Required]
  [Range(1, 100)]
- [StringLength(100)]
+ [StringLength(100, MinimunLenght = 10)]
  
 If we want the client will be unique we can do this in the Post method
 
@@ -215,20 +215,43 @@ public async Task<ActionResult<ClientModel>> Put (string code, ClientModel model
 }
 ```
 
+- Associate Controller
+The association hierarchy can be deep or shallow
+We can have an associate controller, and the attribute will be so:
 
+```C#
+[ApiController]
+[Route("api/clients/{code}/invoices")]
+```
 
+And in the Get for example, add the parameter in the method
 
+```C#
+[HttpGet]
+public async <Task<ActionResult<InviceModel[]>> Get(string code) {}
+```
 
+For an individual invoice, the method will be so
 
+```C#
+[HttpGet("{id:ing}")]
+public async Task<ActionResult<InvoiceModel>> Get(string code, int id) {}
+```
 
+- Functional APIs
+REST defines URIs as resources, but execption exsit...
+...don't be afraid of functionsl APIs, but avoid RPC style APIs at all costs
 
+When sould you use Functional APIs?
+- For operational needs (like clearing the cache, restarting servers, etc.)
+- Avoid fro reporting
 
-
-
-
-
-
-
-
-
-
+```C#
+[HttpOptions("reloadconfig")] // This is a non-resource-based verb and specify the name of the verb
+public IActionResult ReloadConfig(){
+  try {
+    var root = (IConfigurationRoot)_config; // IConfigurationRoot guarantees it's the root of the configuration
+    root.Reload();
+    return Ok();
+  }
+}
