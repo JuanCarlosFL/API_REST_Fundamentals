@@ -255,3 +255,36 @@ public IActionResult ReloadConfig(){
     return Ok();
   }
 }
+```
+
+# CORS
+
+- Es un mecanistmo que nos permite configurar restricciones sobre los recursos de nuestra API que sean requeridos por fuera del domino donde el recurso se encuentra hospedado.
+- Es un estándar W3C
+- Ayuda a evitar llamadas maliciosas a nuestros servicios o recursos
+
+### Request Headers
+
+- Origin
+- Access-Control-Request-Method
+- Access-Control-Request-Headers
+
+### Response Headers
+
+- Access-Control-Allow-Origin
+- Access-Control-Allow-Credentials
+- Access-Control-Expose-Headers
+- Access-Control-Max-Age
+- Access-Control-Allow-Methods
+- Access-Control-Allow-Headers
+
+Ejemplo
+
+```C#
+app.UseCors(builder =>
+ builder.WithOrigins("url")
+ .WithMthods("GET", "POST", "PUT", "DELETE")
+ .AllowAnyHeader())
+ .Build();
+```
+
